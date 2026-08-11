@@ -16,6 +16,20 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const register = async (req: Request, res: Response) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return errorResponse(res, 'Name, email, and password are required', 400);
+    }
+
+    const data = await AuthService.register(name, email, password, role);
+    return successResponse(res, data, 201);
+  } catch (error: any) {
+    return errorResponse(res, error.message, 400);
+  }
+};
+
 export const getMe = async (req: Request, res: Response) => {
   try {
     if (!req.user) {

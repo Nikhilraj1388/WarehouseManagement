@@ -33,7 +33,7 @@ export const ChallanDetail: React.FC = () => {
   const challan = data?.data;
   if (!challan) return <div>Challan not found</div>;
 
-  const totalAmount = challan.items?.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0) || 0;
+  const totalAmount = challan.items?.reduce((sum: number, item: any) => sum + (Number(item.unitPrice) * item.quantity), 0) || 0;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
@@ -106,8 +106,8 @@ export const ChallanDetail: React.FC = () => {
                     <p className="text-sm text-gray-500">SKU: {item.sku}</p>
                   </td>
                   <td className="py-4 text-center text-gray-700">{item.quantity}</td>
-                  <td className="py-4 text-right text-gray-700">₹{item.unitPrice.toFixed(2)}</td>
-                  <td className="py-4 text-right font-medium text-gray-900">₹{(item.unitPrice * item.quantity).toFixed(2)}</td>
+                  <td className="py-4 text-right text-gray-700">₹{Number(item.unitPrice).toFixed(2)}</td>
+                  <td className="py-4 text-right font-medium text-gray-900">₹{(Number(item.unitPrice) * item.quantity).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

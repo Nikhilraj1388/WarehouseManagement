@@ -49,7 +49,7 @@ export const CreateChallan: React.FC = () => {
   const totalQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
   const totalAmount = items.reduce((sum, item) => {
     const p = getProductInfo(item.productId);
-    return sum + (p ? p.unitPrice * (Number(item.quantity) || 0) : 0);
+    return sum + (p ? Number(p.unitPrice) * (Number(item.quantity) || 0) : 0);
   }, 0);
 
   return (
@@ -124,7 +124,7 @@ export const CreateChallan: React.FC = () => {
                           </select>
                         </td>
                         <td className="py-3 px-4 text-gray-600">
-                          {product ? `₹${product.unitPrice.toFixed(2)}` : '-'}
+                          {product ? `₹${Number(product.unitPrice).toFixed(2)}` : '-'}
                         </td>
                         <td className="py-3 px-4">
                           <input 
@@ -136,7 +136,7 @@ export const CreateChallan: React.FC = () => {
                           />
                         </td>
                         <td className="py-3 px-4 font-medium text-gray-900">
-                          {product ? `₹${(product.unitPrice * item.quantity).toFixed(2)}` : '-'}
+                          {product ? `₹${(Number(product.unitPrice) * item.quantity).toFixed(2)}` : '-'}
                         </td>
                         <td className="py-3 px-4">
                           <button onClick={() => removeItem(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">

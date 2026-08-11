@@ -24,6 +24,34 @@ export class AuthService {
     return { token, user: userWithoutPassword };
   }
 
+  static async register(name: string, email: string, password: string, role: string = 'ADMIN') {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new Error('Email is already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const validRole = ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'].includes(role) ? role : 'ADMIN';
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash: hashedPassword,
+        role: validRole,
+      }
+    });
+
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET || 'mini-erp-jwt-secret-key-2024',
+      { expiresIn: '1d' }
+    );
+
+    const { passwordHash, ...userWithoutPassword } = user;
+    return { token, user: userWithoutPassword };
+  }
+
   static async getMe(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
