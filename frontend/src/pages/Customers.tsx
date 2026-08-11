@@ -4,11 +4,12 @@ import { customerService } from '../services/customer.service';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { Modal } from '../components/Modal';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
 import { CustomerType, CustomerStatus } from '../types';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Eye } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Customers: React.FC = () => {
@@ -16,6 +17,7 @@ export const Customers: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     customerName: '',
@@ -43,6 +45,19 @@ export const Customers: React.FC = () => {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Something went wrong');
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => customerService.deleteCustomer(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      toast.success('Customer deleted successfully');
+      setDeletingId(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete customer');
+      setDeletingId(null);
     }
   });
 
@@ -90,11 +105,14 @@ export const Customers: React.FC = () => {
     { header: 'Status', accessor: (row: any) => <StatusBadge status={row.status} /> },
     { header: 'Actions', accessor: (row: any) => (
       <div className="flex gap-2">
-        <Link to={`/customers/${row.id}`} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+        <Link to={`/customers/${row.id}`} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Detail">
           <Eye size={18} />
         </Link>
-        <button onClick={() => handleOpenModal(row)} className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
+        <button onClick={() => handleOpenModal(row)} className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit Customer">
           <Edit2 size={18} />
+        </button>
+        <button onClick={() => setDeletingId(row.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Customer">
+          <Trash2 size={18} />
         </button>
       </div>
     )}
@@ -158,6 +176,16 @@ export const Customers: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        title="Delete Customer"
+        message="Are you sure you want to delete this customer? This action cannot be undone."
+        confirmText="Delete"
+        danger
+        onConfirm={() => deletingId && deleteMutation.mutate(deletingId)}
+        onCancel={() => setDeletingId(null)}
+      />
     </div>
   );
 };

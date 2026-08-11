@@ -24,21 +24,22 @@ export class AuthService {
     return { token, user: userWithoutPassword };
   }
 
-  static async register(name: string, email: string, password: string, role: string = 'ADMIN') {
+  static async register(name: string, email: string, password: string, role: string = 'SALES') {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       throw new Error('Email is already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const validRole = ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'].includes(role) ? role : 'ADMIN';
+    // Public registrations default to SALES for security
+    const assignedRole = role === 'ADMIN' ? 'SALES' : (['SALES', 'WAREHOUSE', 'ACCOUNTS'].includes(role) ? role : 'SALES');
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
         passwordHash: hashedPassword,
-        role: validRole,
+        role: assignedRole,
       }
     });
 

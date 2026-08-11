@@ -113,26 +113,6 @@ export const Login: React.FC = () => {
             </div>
           </div>
 
-          {isRegister && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">System Role</label>
-              <div className="relative">
-                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm text-gray-900 appearance-none"
-                >
-                  <option value="ADMIN">ADMIN (Full Access)</option>
-                  <option value="SALES">SALES (CRM & Challans)</option>
-                  <option value="WAREHOUSE">WAREHOUSE (Products & Stock)</option>
-                  <option value="ACCOUNTS">ACCOUNTS (Read-only Challans)</option>
-                </select>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Select ADMIN for full access to all features.</p>
-            </div>
-          )}
-
           <button
             type="submit"
             disabled={loading}

@@ -61,6 +61,12 @@ export class CustomerService {
     });
   }
 
+  static async deleteCustomer(id: string) {
+    const customer = await prisma.customer.findUnique({ where: { id } });
+    if (!customer) throw new Error('Customer not found');
+    return prisma.customer.delete({ where: { id } });
+  }
+
   static async addFollowUp(customerId: string, userId: string, data: { note: string, nextFollowUpDate?: string }) {
     return prisma.$transaction(async (tx) => {
       const followUp = await tx.followUp.create({

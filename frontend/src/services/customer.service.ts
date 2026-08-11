@@ -18,8 +18,12 @@ export const customerService = {
     const response = await api.put<ApiResponse<Customer>>(`/customers/${id}`, data);
     return response.data;
   },
+  deleteCustomer: async (id: string) => {
+    const response = await api.delete<ApiResponse<any>>(`/customers/${id}`);
+    return response.data;
+  },
   addFollowUp: async (id: string, note: string) => {
-    const response = await api.post<ApiResponse<FollowUp>>(`/customers/${id}/follow-ups`, { note });
+    const response = await api.post<ApiResponse<FollowUp>>(`/customers/${id}/followups`, { note });
     return response.data;
   },
 };

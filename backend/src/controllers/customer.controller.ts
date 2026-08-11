@@ -47,6 +47,15 @@ export const updateCustomer = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteCustomer = async (req: Request, res: Response) => {
+  try {
+    await CustomerService.deleteCustomer(req.params.id);
+    return successResponse(res, { message: 'Customer deleted successfully' });
+  } catch (error: any) {
+    return errorResponse(res, error.message, 400);
+  }
+};
+
 export const addFollowUp = async (req: Request, res: Response) => {
   try {
     const validatedData = followUpSchema.parse(req.body);
