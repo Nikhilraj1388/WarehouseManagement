@@ -325,19 +325,19 @@ Status: Pending
 
 # Git Commit Tracker
 
-- [ ] Initial project setup
-- [ ] Database schema
-- [ ] Authentication
-- [ ] Customer module
-- [ ] Product module
-- [ ] Inventory module
-- [ ] Challan module
-- [ ] Frontend implementation
-- [ ] API integration
+- [x] Initial project setup (includes all modules)
+- [x] Database schema
+- [x] Authentication
+- [x] Customer module
+- [x] Product module
+- [x] Inventory module
+- [x] Challan module
+- [x] Frontend implementation
+- [x] API integration
 - [ ] Deployment
 - [ ] Documentation
 
-Total Planned Commits: **11**
+Total Planned Commits: **11** | Completed: **1 (combined)**
 
 ---
 
@@ -357,9 +357,13 @@ Pending
 
 ## Database
 
-Supabase Project:
+Supabase Project: ouqyhqrypxszchhvwyuh
 
-Pending
+✅ Connected
+
+## GitHub
+
+Repository: https://github.com/Nikhilraj1388/WarehouseManagement
 
 ---
 
