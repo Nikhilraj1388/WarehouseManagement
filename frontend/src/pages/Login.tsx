@@ -11,14 +11,18 @@ export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('ADMIN');
+  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     if (!email || !password || (isRegister && !name)) {
-      toast.error('Please fill in all required fields');
+      const msg = 'Please fill in all required fields';
+      setErrorMessage(msg);
+      toast.error(msg);
       return;
     }
     
@@ -31,7 +35,9 @@ export const Login: React.FC = () => {
           toast.success('Account created successfully!');
           navigate('/dashboard');
         } else {
-          toast.error(res.message || 'Registration failed');
+          const msg = res.message || 'Registration failed';
+          setErrorMessage(msg);
+          toast.error(msg);
         }
       } else {
         const res = await authService.login(email, password);
@@ -40,11 +46,15 @@ export const Login: React.FC = () => {
           toast.success('Login successful');
           navigate('/dashboard');
         } else {
-          toast.error(res.message || 'Login failed');
+          const msg = res.message || 'Login failed';
+          setErrorMessage(msg);
+          toast.error(msg);
         }
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || (isRegister ? 'Registration failed' : 'Invalid credentials'));
+      const msg = error.response?.data?.message || (isRegister ? 'Registration failed' : 'Incorrect password or email');
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -64,6 +74,13 @@ export const Login: React.FC = () => {
             {isRegister ? 'Register your user credentials below' : 'Sign in to Mini ERP Operations Portal'}
           </p>
         </div>
+
+        {errorMessage && (
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegister && (

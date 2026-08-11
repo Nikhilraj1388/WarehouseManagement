@@ -6,12 +6,12 @@ export class AuthService {
   static async login(email: string, password: string) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error('No account found with this email address');
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      throw new Error('Invalid credentials');
+      throw new Error('Incorrect password. Please try again.');
     }
 
     const token = jwt.sign(
