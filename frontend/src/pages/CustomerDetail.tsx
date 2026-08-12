@@ -84,10 +84,30 @@ export const CustomerDetail: React.FC = () => {
                   <span>{customer.businessName}</span>
                 </div>
               )}
+              {customer.gstNumber && (
+                <div className="flex items-center gap-3 text-gray-600">
+                  <span className="text-xs font-bold text-gray-400 px-1.5 py-0.5 border border-gray-300 rounded">GST</span>
+                  <span className="font-mono text-sm">{customer.gstNumber}</span>
+                </div>
+              )}
+              {customer.followUpDate && (
+                <div className="flex items-center gap-3 text-gray-600">
+                  <Calendar size={18} className="text-blue-500" />
+                  <span className="text-sm font-medium text-blue-700">
+                    Next Follow-up: {format(new Date(customer.followUpDate), 'MMM dd, yyyy')}
+                  </span>
+                </div>
+              )}
               {customer.address && (
                 <div className="flex items-start gap-3 text-gray-600">
                   <MapPin size={18} className="text-gray-400 mt-1" />
                   <span>{customer.address}</span>
+                </div>
+              )}
+              {customer.notes && (
+                <div className="pt-3 border-t border-gray-100">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Customer Notes</span>
+                  <p className="text-sm text-gray-600 italic bg-gray-50 p-2.5 rounded-lg border border-gray-100">{customer.notes}</p>
                 </div>
               )}
             </div>

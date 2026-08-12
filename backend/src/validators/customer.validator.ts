@@ -9,7 +9,9 @@ export const createCustomerSchema = z.object({
   gstNumber: z.string().optional(),
   customerType: z.enum(['RETAIL', 'WHOLESALE', 'DISTRIBUTOR']),
   address: z.string().optional(),
-  status: z.enum(['LEAD', 'ACTIVE', 'INACTIVE']).optional()
+  status: z.enum(['LEAD', 'ACTIVE', 'INACTIVE']).optional(),
+  followUpDate: z.string().optional().or(z.literal('')),
+  notes: z.string().optional()
 });
 
 export const updateCustomerSchema = createCustomerSchema.partial();

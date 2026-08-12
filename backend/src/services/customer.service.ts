@@ -35,7 +35,13 @@ export class CustomerService {
   }
 
   static async createCustomer(data: any) {
-    return prisma.customer.create({ data });
+    const payload = { ...data };
+    if (payload.followUpDate && payload.followUpDate !== '') {
+      payload.followUpDate = new Date(payload.followUpDate);
+    } else {
+      delete payload.followUpDate;
+    }
+    return prisma.customer.create({ data: payload });
   }
 
   static async getCustomerById(id: string) {
@@ -58,9 +64,15 @@ export class CustomerService {
   }
 
   static async updateCustomer(id: string, data: any) {
+    const payload = { ...data };
+    if (payload.followUpDate && payload.followUpDate !== '') {
+      payload.followUpDate = new Date(payload.followUpDate);
+    } else if (payload.followUpDate === '' || payload.followUpDate === null) {
+      payload.followUpDate = null;
+    }
     return prisma.customer.update({
       where: { id },
-      data
+      data: payload
     });
   }
 

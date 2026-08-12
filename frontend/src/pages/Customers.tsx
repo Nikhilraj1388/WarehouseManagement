@@ -9,8 +9,9 @@ import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
 import { CustomerType, CustomerStatus } from '../types';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Eye, Trash2, Filter } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2, Filter, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
 
 import { useAuth } from '../hooks/useAuth';
 
@@ -31,8 +32,12 @@ export const Customers: React.FC = () => {
     mobile: '',
     email: '',
     businessName: '',
+    gstNumber: '',
     customerType: CustomerType.RETAIL,
-    status: CustomerStatus.ACTIVE
+    address: '',
+    status: CustomerStatus.ACTIVE,
+    followUpDate: '',
+    notes: ''
   });
 
   const queryClient = useQueryClient();
@@ -76,18 +81,23 @@ export const Customers: React.FC = () => {
     if (customer) {
       setEditingId(customer.id);
       setFormData({
-        customerName: customer.customerName,
-        mobile: customer.mobile,
+        customerName: customer.customerName || '',
+        mobile: customer.mobile || '',
         email: customer.email || '',
         businessName: customer.businessName || '',
-        customerType: customer.customerType,
-        status: customer.status
+        gstNumber: customer.gstNumber || '',
+        customerType: customer.customerType || CustomerType.RETAIL,
+        address: customer.address || '',
+        status: customer.status || CustomerStatus.ACTIVE,
+        followUpDate: customer.followUpDate ? format(new Date(customer.followUpDate), 'yyyy-MM-dd') : '',
+        notes: customer.notes || ''
       });
     } else {
       setEditingId(null);
       setFormData({
-        customerName: '', mobile: '', email: '', businessName: '',
-        customerType: CustomerType.RETAIL, status: CustomerStatus.ACTIVE
+        customerName: '', mobile: '', email: '', businessName: '', gstNumber: '',
+        customerType: CustomerType.RETAIL, address: '', status: CustomerStatus.ACTIVE,
+        followUpDate: '', notes: ''
       });
     }
     setIsModalOpen(true);
@@ -107,10 +117,15 @@ export const Customers: React.FC = () => {
     { header: 'Name', accessor: (row: any) => (
       <div>
         <div className="font-medium text-gray-900">{row.customerName}</div>
-        <div className="text-xs text-gray-500">{row.email}</div>
+        <div className="text-xs text-gray-500">{row.email || row.mobile}</div>
       </div>
     )},
-    { header: 'Business', accessor: 'businessName' },
+    { header: 'Business / GST', accessor: (row: any) => (
+      <div>
+        <div className="font-medium text-gray-800">{row.businessName || '—'}</div>
+        {row.gstNumber && <div className="text-xs font-mono text-gray-500">GST: {row.gstNumber}</div>}
+      </div>
+    )},
     { header: 'Mobile', accessor: 'mobile' },
     { header: 'Type', accessor: (row: any) => (
       <span className={`px-2 py-1 rounded-md text-xs font-medium ${
@@ -122,6 +137,12 @@ export const Customers: React.FC = () => {
       </span>
     )},
     { header: 'Status', accessor: (row: any) => <StatusBadge status={row.status} /> },
+    { header: 'Follow-up Date', accessor: (row: any) => row.followUpDate ? (
+      <div className="flex items-center gap-1.5 text-xs text-gray-600 font-medium">
+        <Calendar size={14} className="text-blue-500" />
+        {format(new Date(row.followUpDate), 'MMM dd, yyyy')}
+      </div>
+    ) : <span className="text-xs text-gray-400">—</span> },
     { header: 'Actions', accessor: (row: any) => (
       <div className="flex gap-2">
         <Link to={`/customers/${row.id}`} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Detail">
@@ -198,15 +219,17 @@ export const Customers: React.FC = () => {
         onSearch={(v) => { setSearch(v); setPage(1); }}
       />
 
+      {/* Add / Edit Customer Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingId ? 'Edit Customer' : 'Add Customer'}>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto pr-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormInput label="Customer Name" value={formData.customerName} onChange={e => setFormData({...formData, customerName: e.target.value})} required />
-            <FormInput label="Mobile Number" value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} required />
+            <FormInput label="Customer Name *" value={formData.customerName} onChange={e => setFormData({...formData, customerName: e.target.value})} required />
+            <FormInput label="Mobile Number *" value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} required />
             <FormInput label="Email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
             <FormInput label="Business Name" value={formData.businessName} onChange={e => setFormData({...formData, businessName: e.target.value})} />
+            <FormInput label="GST Number (Optional)" value={formData.gstNumber} onChange={e => setFormData({...formData, gstNumber: e.target.value})} placeholder="e.g. 22AAAAA0000A1Z5" />
             <FormSelect 
-              label="Customer Type" 
+              label="Customer Type *" 
               value={formData.customerType} 
               onChange={e => setFormData({...formData, customerType: e.target.value as CustomerType})}
               options={[
@@ -216,7 +239,7 @@ export const Customers: React.FC = () => {
               ]}
             />
             <FormSelect 
-              label="Status" 
+              label="Status *" 
               value={formData.status} 
               onChange={e => setFormData({...formData, status: e.target.value as CustomerStatus})}
               options={[
@@ -225,11 +248,40 @@ export const Customers: React.FC = () => {
                 { label: 'Inactive', value: CustomerStatus.INACTIVE }
               ]}
             />
+            <FormInput 
+              label="Next Follow-up Date" 
+              type="date" 
+              value={formData.followUpDate} 
+              onChange={e => setFormData({...formData, followUpDate: e.target.value})} 
+            />
           </div>
-          <div className="flex justify-end gap-3 mt-6">
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={e => setFormData({...formData, address: e.target.value})}
+              placeholder="Full street address, city, state, pincode"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes / Description</label>
+            <textarea
+              rows={3}
+              value={formData.notes}
+              onChange={e => setFormData({...formData, notes: e.target.value})}
+              placeholder="Initial customer background, preferences, or notes..."
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6 pt-2 border-t border-gray-100">
             <button type="button" onClick={handleCloseModal} className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium">Cancel</button>
             <button type="submit" disabled={mutation.isPending} className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-medium disabled:opacity-70 shadow-md shadow-blue-500/20">
-              {mutation.isPending ? 'Saving...' : 'Save'}
+              {mutation.isPending ? 'Saving...' : 'Save Customer'}
             </button>
           </div>
         </form>
