@@ -1,7 +1,16 @@
 import axios from 'axios';
 
+const getBaseUrl = () => {
+  let url = (import.meta.env.VITE_API_URL as string) || 'https://mini-erp-backend-rvwj.onrender.com/api';
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('/api')) {
+    url += '/api';
+  }
+  return url;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://mini-erp-backend-rvwj.onrender.com/api',
+  baseURL: getBaseUrl(),
 });
 
 api.interceptors.request.use((config) => {
