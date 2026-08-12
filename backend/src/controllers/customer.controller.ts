@@ -5,10 +5,11 @@ import { createCustomerSchema, updateCustomerSchema, followUpSchema } from '../v
 
 export const getCustomers = async (req: Request, res: Response) => {
   try {
-    const { search, status, page = '1', limit = '10' } = req.query;
+    const { search, status, customerType, page = '1', limit = '10' } = req.query;
     const data = await CustomerService.getCustomers({
       search: search as string,
       status: status as string,
+      customerType: customerType as string,
       page: parseInt(page as string),
       limit: parseInt(limit as string)
     });

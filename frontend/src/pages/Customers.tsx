@@ -9,7 +9,7 @@ import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
 import { CustomerType, CustomerStatus } from '../types';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Eye, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
@@ -20,6 +20,8 @@ export const Customers: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -36,8 +38,12 @@ export const Customers: React.FC = () => {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['customers', page, search],
-    queryFn: () => customerService.getCustomers({ page, search, limit: 10 })
+    queryKey: ['customers', page, search, statusFilter, typeFilter],
+    queryFn: () => customerService.getCustomers({ 
+      page, search, limit: 10,
+      ...(statusFilter && { status: statusFilter }),
+      ...(typeFilter && { customerType: typeFilter })
+    })
   });
 
   const mutation = useMutation({
@@ -106,7 +112,15 @@ export const Customers: React.FC = () => {
     )},
     { header: 'Business', accessor: 'businessName' },
     { header: 'Mobile', accessor: 'mobile' },
-    { header: 'Type', accessor: 'customerType' },
+    { header: 'Type', accessor: (row: any) => (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+        row.customerType === 'RETAIL' ? 'bg-purple-100 text-purple-700' :
+        row.customerType === 'WHOLESALE' ? 'bg-indigo-100 text-indigo-700' :
+        'bg-cyan-100 text-cyan-700'
+      }`}>
+        {row.customerType}
+      </span>
+    )},
     { header: 'Status', accessor: (row: any) => <StatusBadge status={row.status} /> },
     { header: 'Actions', accessor: (row: any) => (
       <div className="flex gap-2">
@@ -137,6 +151,39 @@ export const Customers: React.FC = () => {
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30 flex items-center gap-2"
           >
             <Plus size={18} /> Add Customer
+          </button>
+        )}
+      </div>
+
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+        <Filter size={16} className="text-gray-400" />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white"
+        >
+          <option value="">All Statuses</option>
+          <option value="LEAD">Lead</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
+        <select
+          value={typeFilter}
+          onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white"
+        >
+          <option value="">All Types</option>
+          <option value="RETAIL">Retail</option>
+          <option value="WHOLESALE">Wholesale</option>
+          <option value="DISTRIBUTOR">Distributor</option>
+        </select>
+        {(statusFilter || typeFilter) && (
+          <button
+            onClick={() => { setStatusFilter(''); setTypeFilter(''); setPage(1); }}
+            className="px-3 py-2 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+          >
+            Clear Filters
           </button>
         )}
       </div>

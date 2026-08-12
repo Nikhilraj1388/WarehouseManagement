@@ -5,15 +5,19 @@ import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Eye, Plus } from 'lucide-react';
+import { Eye, Plus, Filter } from 'lucide-react';
 
 export const Challans: React.FC = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const { data, isLoading } = useQuery({
-    queryKey: ['challans', page, search],
-    queryFn: () => challanService.getChallans({ page, search, limit: 10 })
+    queryKey: ['challans', page, search, statusFilter],
+    queryFn: () => challanService.getChallans({ 
+      page, search, limit: 10,
+      ...(statusFilter && { status: statusFilter })
+    })
   });
 
   const columns = [
@@ -39,6 +43,29 @@ export const Challans: React.FC = () => {
         >
           <Plus size={18} /> Create Challan
         </Link>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+        <Filter size={16} className="text-gray-400" />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white"
+        >
+          <option value="">All Statuses</option>
+          <option value="DRAFT">Draft</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+        {statusFilter && (
+          <button
+            onClick={() => { setStatusFilter(''); setPage(1); }}
+            className="px-3 py-2 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+          >
+            Clear Filter
+          </button>
+        )}
       </div>
 
       <DataTable 

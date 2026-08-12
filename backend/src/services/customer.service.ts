@@ -2,8 +2,8 @@ import prisma from '../prisma/client';
 import { PrismaClient } from '@prisma/client';
 
 export class CustomerService {
-  static async getCustomers(params: { search?: string, status?: string, page: number, limit: number }) {
-    const { search, status, page, limit } = params;
+  static async getCustomers(params: { search?: string, status?: string, customerType?: string, page: number, limit: number }) {
+    const { search, status, customerType, page, limit } = params;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -16,6 +16,9 @@ export class CustomerService {
     }
     if (status) {
       where.status = status as string;
+    }
+    if (customerType) {
+      where.customerType = customerType as string;
     }
 
     const [data, total] = await Promise.all([
