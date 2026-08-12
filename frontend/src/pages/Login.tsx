@@ -52,7 +52,13 @@ export const Login: React.FC = () => {
         }
       }
     } catch (error: any) {
-      const msg = error.response?.data?.message || (isRegister ? 'Registration failed' : 'Incorrect password or email');
+      let msg = 'An error occurred during login';
+      if (error.response?.data?.message) {
+        const serverMsg = error.response.data.message;
+        msg = typeof serverMsg === 'string' ? serverMsg : (Array.isArray(serverMsg) ? serverMsg.map((e: any) => e.message || e).join(', ') : JSON.stringify(serverMsg));
+      } else if (error.message) {
+        msg = error.message;
+      }
       setErrorMessage(msg);
       toast.error(msg);
     } finally {
