@@ -14,6 +14,14 @@ export const updateProductSchema = createProductSchema.partial();
 
 export const stockUpdateSchema = z.object({
   quantity: z.number().int().positive('Quantity must be greater than 0'),
-  type: z.enum(['IN', 'OUT']),
+  type: z.enum(['IN', 'OUT']).optional(),
+  movementType: z.enum(['IN', 'OUT']).optional(),
   reason: z.string().optional()
-});
+}).refine(data => data.type || data.movementType, {
+  message: "Invalid option: expected type or movementType to be 'IN' or 'OUT'",
+  path: ['movementType']
+}).transform(data => ({
+  quantity: data.quantity,
+  type: (data.type || data.movementType!) as 'IN' | 'OUT',
+  reason: data.reason
+}));

@@ -6,13 +6,15 @@ import { PrismaClient } from '@prisma/client';
 const router = Router();
 
 router.use(authenticate);
-router.use(requireRole(['ADMIN', 'SALES']));
 
-router.get('/', getCustomers);
-router.post('/', createCustomer);
-router.get('/:id', getCustomerById);
-router.put('/:id', updateCustomer);
-router.delete('/:id', deleteCustomer);
-router.post('/:id/followups', addFollowUp);
+// Read access for all roles
+router.get('/', requireRole(['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS']), getCustomers);
+router.get('/:id', requireRole(['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS']), getCustomerById);
+
+// Write access for ADMIN and SALES
+router.post('/', requireRole(['ADMIN', 'SALES']), createCustomer);
+router.put('/:id', requireRole(['ADMIN', 'SALES']), updateCustomer);
+router.delete('/:id', requireRole(['ADMIN', 'SALES']), deleteCustomer);
+router.post('/:id/followups', requireRole(['ADMIN', 'SALES']), addFollowUp);
 
 export default router;

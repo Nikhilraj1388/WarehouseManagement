@@ -36,13 +36,35 @@ export class ChallanService {
       // Generate challan number
       const count = await tx.challan.count();
       const challanNumber = `CH-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+      const status = data.status || 'DRAFT';
       
       let totalQty = 0;
       const challanItems = [];
 
       for (const item of data.items) {
         const product = await tx.product.findUnique({ where: { id: item.productId } });
-        if (!product) throw new Error(`Product ${item.productId} not found`);
+        if (!product) throw new Error(`Product not found`);
+
+        if (status === 'CONFIRMED') {
+          if (product.currentStock < item.quantity) {
+            throw new Error(`Insufficient stock for product ${product.name}. Required: ${item.quantity}, Available: ${product.currentStock}`);
+          }
+
+          await tx.product.update({
+            where: { id: product.id },
+            data: { currentStock: product.currentStock - item.quantity }
+          });
+
+          await tx.stockMovement.create({
+            data: {
+              productId: product.id,
+              quantity: item.quantity,
+              movementType: 'OUT',
+              reason: `Challan ${challanNumber}`,
+              createdBy: userId
+            }
+          });
+        }
 
         challanItems.push({
           productId: product.id,
@@ -58,6 +80,7 @@ export class ChallanService {
         data: {
           challanNumber,
           customerId: data.customerId,
+          status,
           createdBy: userId,
           totalQuantity: totalQty,
           items: {

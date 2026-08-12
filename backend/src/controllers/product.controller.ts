@@ -47,6 +47,15 @@ export const updateProduct = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    await ProductService.deleteProduct(req.params.id);
+    return successResponse(res, { message: 'Product deleted successfully' });
+  } catch (error: any) {
+    return errorResponse(res, error.message, 400);
+  }
+};
+
 export const getProductMovements = async (req: Request, res: Response) => {
   try {
     const movements = await ProductService.getProductMovements(req.params.id);

@@ -8,6 +8,7 @@ export const challanItemSchema = z.object({
 
 export const createChallanSchema = z.object({
   customerId: z.string(),
+  status: z.enum(['DRAFT', 'CONFIRMED']).optional(),
   items: z.array(challanItemSchema).min(1, 'At least one item is required')
 });
 

@@ -67,6 +67,12 @@ export class ProductService {
     });
   }
 
+  static async deleteProduct(id: string) {
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) throw new Error('Product not found');
+    return prisma.product.delete({ where: { id } });
+  }
+
   static async getProductMovements(id: string) {
     return prisma.stockMovement.findMany({
       where: { productId: id },

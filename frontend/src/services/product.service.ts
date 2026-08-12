@@ -18,8 +18,18 @@ export const productService = {
     const response = await api.put<ApiResponse<Product>>(`/products/${id}`, data);
     return response.data;
   },
-  updateStock: async (id: string, data: { quantity: number; movementType: MovementType; reason: string }) => {
-    const response = await api.post<ApiResponse<StockMovement>>(`/products/${id}/stock`, data);
+  deleteProduct: async (id: string) => {
+    const response = await api.delete<ApiResponse<any>>(`/products/${id}`);
+    return response.data;
+  },
+  updateStock: async (id: string, data: { quantity: number; movementType?: MovementType; type?: MovementType; reason: string }) => {
+    const payload = {
+      quantity: data.quantity,
+      type: data.type || data.movementType || 'IN',
+      movementType: data.movementType || data.type || 'IN',
+      reason: data.reason
+    };
+    const response = await api.post<ApiResponse<StockMovement>>(`/products/${id}/stock`, payload);
     return response.data;
   },
   getMovements: async (id: string) => {

@@ -21,7 +21,8 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 
 export const requireRole = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    // ADMIN has master access to all routes
+    if (!req.user || (req.user.role !== 'ADMIN' && !roles.includes(req.user.role))) {
       return res.status(403).json({ success: false, message: 'Forbidden: Insufficient permissions' });
     }
     next();

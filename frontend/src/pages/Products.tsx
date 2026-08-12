@@ -3,11 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService } from '../services/product.service';
 import { DataTable } from '../components/DataTable';
 import { Modal } from '../components/Modal';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
 import { MovementType } from '../types';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, ArrowDownUp, History } from 'lucide-react';
+import { Plus, Edit2, ArrowDownUp, Trash2 } from 'lucide-react';
 
 export const Products: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -15,13 +16,14 @@ export const Products: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: '', sku: '', category: '', unitPrice: 0, minimumStock: 0, warehouseLocation: ''
   });
 
   const [stockData, setStockData] = useState({
-    quantity: 0, movementType: MovementType.IN, reason: ''
+    quantity: 0, movementType: MovementType.IN, type: MovementType.IN, reason: ''
   });
 
   const queryClient = useQueryClient();
@@ -42,6 +44,19 @@ export const Products: React.FC = () => {
     onError: (error: any) => toast.error(error.response?.data?.message || 'Something went wrong')
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => productService.deleteProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Product deleted successfully');
+      setDeletingId(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete product');
+      setDeletingId(null);
+    }
+  });
+
   const stockMutation = useMutation({
     mutationFn: (data: any) => productService.updateStock(editingId!, data),
     onSuccess: () => {
@@ -57,7 +72,7 @@ export const Products: React.FC = () => {
       setEditingId(product.id);
       setFormData({
         name: product.name, sku: product.sku, category: product.category,
-        unitPrice: product.unitPrice, minimumStock: product.minimumStock,
+        unitPrice: Number(product.unitPrice), minimumStock: product.minimumStock,
         warehouseLocation: product.warehouseLocation || ''
       });
     } else {
@@ -69,7 +84,7 @@ export const Products: React.FC = () => {
 
   const handleOpenStockModal = (product: any) => {
     setEditingId(product.id);
-    setStockData({ quantity: 1, movementType: MovementType.IN, reason: '' });
+    setStockData({ quantity: 1, movementType: MovementType.IN, type: MovementType.IN, reason: '' });
     setIsStockModalOpen(true);
   };
 
@@ -93,8 +108,11 @@ export const Products: React.FC = () => {
         <button onClick={() => handleOpenStockModal(row)} className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Update Stock">
           <ArrowDownUp size={18} />
         </button>
-        <button onClick={() => handleOpenModal(row)} className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+        <button onClick={() => handleOpenModal(row)} className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit Product">
           <Edit2 size={18} />
+        </button>
+        <button onClick={() => setDeletingId(row.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Product">
+          <Trash2 size={18} />
         </button>
       </div>
     )}
@@ -146,7 +164,10 @@ export const Products: React.FC = () => {
           <FormSelect 
             label="Movement Type" 
             value={stockData.movementType} 
-            onChange={e => setStockData({...stockData, movementType: e.target.value as MovementType})}
+            onChange={e => {
+              const val = e.target.value as MovementType;
+              setStockData({...stockData, movementType: val, type: val});
+            }}
             options={[{ label: 'Stock In (+)', value: MovementType.IN }, { label: 'Stock Out (-)', value: MovementType.OUT }]}
           />
           <FormInput label="Quantity" type="number" min="1" value={stockData.quantity} onChange={e => setStockData({...stockData, quantity: parseInt(e.target.value)})} required />
@@ -158,6 +179,16 @@ export const Products: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        danger
+        onConfirm={() => deletingId && deleteMutation.mutate(deletingId)}
+        onCancel={() => setDeletingId(null)}
+      />
     </div>
   );
 };

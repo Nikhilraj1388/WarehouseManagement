@@ -12,7 +12,12 @@ import toast from 'react-hot-toast';
 import { Plus, Edit2, Eye, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../hooks/useAuth';
+
 export const Customers: React.FC = () => {
+  const { user } = useAuth();
+  const canManage = user?.role === 'ADMIN' || user?.role === 'SALES';
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,12 +113,16 @@ export const Customers: React.FC = () => {
         <Link to={`/customers/${row.id}`} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Detail">
           <Eye size={18} />
         </Link>
-        <button onClick={() => handleOpenModal(row)} className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit Customer">
-          <Edit2 size={18} />
-        </button>
-        <button onClick={() => setDeletingId(row.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Customer">
-          <Trash2 size={18} />
-        </button>
+        {canManage && (
+          <>
+            <button onClick={() => handleOpenModal(row)} className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit Customer">
+              <Edit2 size={18} />
+            </button>
+            <button onClick={() => setDeletingId(row.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Customer">
+              <Trash2 size={18} />
+            </button>
+          </>
+        )}
       </div>
     )}
   ];
@@ -122,12 +131,14 @@ export const Customers: React.FC = () => {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-        <button 
-          onClick={() => handleOpenModal()} 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30 flex items-center gap-2"
-        >
-          <Plus size={18} /> Add Customer
-        </button>
+        {canManage && (
+          <button 
+            onClick={() => handleOpenModal()} 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30 flex items-center gap-2"
+          >
+            <Plus size={18} /> Add Customer
+          </button>
+        )}
       </div>
 
       <DataTable 
