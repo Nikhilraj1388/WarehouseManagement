@@ -1,13 +1,13 @@
 import React from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface Column<T> {
+export interface Column<T = any> {
   header: string;
-  accessor: keyof T | ((row: T) => React.ReactNode);
+  accessor: keyof T | string | ((row: T) => React.ReactNode);
   className?: string;
 }
 
-interface DataTableProps<T> {
+export interface DataTableProps<T = any> {
   columns: Column<T>[];
   data: T[];
   loading?: boolean;
@@ -21,7 +21,7 @@ interface DataTableProps<T> {
   onSearch?: (value: string) => void;
 }
 
-export function DataTable<T>({
+export function DataTable<T = any>({
   columns,
   data,
   loading,
@@ -80,7 +80,7 @@ export function DataTable<T>({
                 <tr key={i} className="hover:bg-gray-50 transition-colors duration-150 group">
                   {columns.map((col, j) => (
                     <td key={j} className={`py-4 px-6 text-sm text-gray-700 ${col.className || ''}`}>
-                      {typeof col.accessor === 'function' ? col.accessor(row) : (row[col.accessor] as React.ReactNode)}
+                      {typeof col.accessor === 'function' ? col.accessor(row) : (row[col.accessor as keyof T] as React.ReactNode)}
                     </td>
                   ))}
                 </tr>
