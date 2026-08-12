@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Package, FileText, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Package, FileText, LogOut, UserCog } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export const Sidebar: React.FC = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
@@ -12,6 +12,10 @@ export const Sidebar: React.FC = () => {
     { name: 'Products', path: '/products', icon: <Package size={20} /> },
     { name: 'Challans', path: '/challans', icon: <FileText size={20} /> },
   ];
+
+  if (user?.role === 'ADMIN') {
+    navItems.push({ name: 'Staff Users', path: '/users', icon: <UserCog size={20} /> });
+  }
 
   return (
     <div className="w-[280px] bg-[#0F172A] text-white flex flex-col h-screen fixed top-0 left-0">

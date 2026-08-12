@@ -9,6 +9,7 @@ import { Products } from './pages/Products';
 import { Challans } from './pages/Challans';
 import { CreateChallan } from './pages/CreateChallan';
 import { ChallanDetail } from './pages/ChallanDetail';
+import { UsersPage } from './pages/Users';
 
 export const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ export const App: React.FC = () => {
         <Route path="challans" element={<Challans />} />
         <Route path="challans/create" element={<CreateChallan />} />
         <Route path="challans/:id" element={<ChallanDetail />} />
+        <Route path="users" element={<UsersPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
