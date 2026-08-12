@@ -4,12 +4,14 @@ import jwt from 'jsonwebtoken';
 
 export class AuthService {
   static async login(email: string, password: string) {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (!user) {
       throw new Error('No account found with this email address');
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    const isMatch = await bcrypt.compare(cleanPassword, user.passwordHash);
     if (!isMatch) {
       throw new Error('Incorrect password. Please try again.');
     }
@@ -25,19 +27,21 @@ export class AuthService {
   }
 
   static async register(name: string, email: string, password: string, role: string = 'SALES') {
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (existing) {
       throw new Error('Email is already registered');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(cleanPassword, 10);
     // Public registrations default to SALES for security
     const assignedRole = role === 'ADMIN' ? 'SALES' : (['SALES', 'WAREHOUSE', 'ACCOUNTS'].includes(role) ? role : 'SALES');
 
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: cleanEmail,
         passwordHash: hashedPassword,
         role: assignedRole,
       }
