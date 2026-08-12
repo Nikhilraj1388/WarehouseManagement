@@ -1,0 +1,396 @@
+{
+	"info": {
+		"_postman_id": "mini-erp-crm-collection-id",
+		"name": "Mini ERP + CRM Portal API Collection",
+		"description": "Complete Postman collection for testing all endpoints of the Mini ERP + CRM Portal, including Authentication, Customer Management, Products & Inventory, Delivery Challans, Staff Users, and Dashboard Stats.",
+		"schema": "https://getpostman.com/schemas/v6.0.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://mini-erp-backend-rvwj.onrender.com/api",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nikhilraj2342005@gmail.com\",\n  \"password\": \"myPassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Sales Rep\",\n  \"email\": \"john.sales@erp.com\",\n  \"password\": \"sales123\",\n  \"role\": \"SALES\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User Profile (/me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Customer CRM Module",
+			"item": [
+				{
+					"name": "Get All Customers (Search & Filter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers?page=1&limit=10&status=ACTIVE&customerType=WHOLESALE",
+							"host": ["{{baseUrl}}"],
+							"path": ["customers"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "status", "value": "ACTIVE" },
+								{ "key": "customerType", "value": "WHOLESALE" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Customer (All 10 Fields)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerName\": \"Apex Enterprises\",\n  \"mobile\": \"9876543210\",\n  \"email\": \"apex@corp.com\",\n  \"businessName\": \"Apex Corp\",\n  \"gstNumber\": \"27ABCDE1234F1Z5\",\n  \"customerType\": \"WHOLESALE\",\n  \"address\": \"123 Industrial Area, Phase 2, Mumbai\",\n  \"status\": \"ACTIVE\",\n  \"followUpDate\": \"2026-08-25\",\n  \"notes\": \"VIP Wholesale Client - High Volume\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers",
+							"host": ["{{baseUrl}}"],
+							"path": ["customers"]
+						}
+					}
+				},
+				{
+					"name": "Get Customer Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["customers", ":id"]
+						}
+					}
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"businessName\": \"Apex Corp Ltd\",\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["customers", ":id"]
+						}
+					}
+				},
+				{
+					"name": "Add Follow-up Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"note\": \"Client agreed to order 100 units next week.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customers/:id/followups",
+							"host": ["{{baseUrl}}"],
+							"path": ["customers", ":id", "followups"]
+						}
+					}
+				},
+				{
+					"name": "Delete Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customers/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["customers", ":id"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Product & Inventory Module",
+			"item": [
+				{
+					"name": "Get All Products (Search & Category Filter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products?page=1&limit=10&category=Electronics",
+							"host": ["{{baseUrl}}"],
+							"path": ["products"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "category", "value": "Electronics" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Wireless Barcode Scanner\",\n  \"sku\": \"WBS-2024-X\",\n  \"category\": \"Electronics\",\n  \"unitPrice\": 2499.00,\n  \"currentStock\": 50,\n  \"minimumStock\": 10,\n  \"warehouseLocation\": \"Rack A1-B3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": ["{{baseUrl}}"],
+							"path": ["products"]
+						}
+					}
+				},
+				{
+					"name": "Update Stock (IN / OUT)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 25,\n  \"type\": \"IN\",\n  \"reason\": \"Received new batch from supplier\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/:id/stock",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", ":id", "stock"]
+						}
+					}
+				},
+				{
+					"name": "Get Stock Movement History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products/:id/movements",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", ":id", "movements"]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", ":id"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Delivery Challan Module",
+			"item": [
+				{
+					"name": "Get All Challans (Search & Status Filter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans?page=1&limit=10&status=DRAFT",
+							"host": ["{{baseUrl}}"],
+							"path": ["challans"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "status", "value": "DRAFT" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Delivery Challan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"<CUSTOMER_ID>\",\n  \"status\": \"DRAFT\",\n  \"items\": [\n    {\n      \"productId\": \"<PRODUCT_ID>\",\n      \"quantity\": 5\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challans",
+							"host": ["{{baseUrl}}"],
+							"path": ["challans"]
+						}
+					}
+				},
+				{
+					"name": "Confirm Challan (Atomic Stock Reduction)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challans/:id/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["challans", ":id", "status"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. User & Staff Management (Admin)",
+			"item": [
+				{
+					"name": "Get All Staff Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						}
+					}
+				},
+				{
+					"name": "Create Staff Member",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Storekeeper Alex\",\n  \"email\": \"alex.wh@erp.com\",\n  \"password\": \"warehouse123\",\n  \"role\": \"WAREHOUSE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Dashboard Module",
+			"item": [
+				{
+					"name": "Get Dashboard KPIs & Analytics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "stats"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

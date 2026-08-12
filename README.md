@@ -1,199 +1,214 @@
-# Mini ERP + CRM Operations Portal
+# 📦 Mini ERP + CRM Operations Portal
 
-A full-stack lightweight business management system for wholesale/distribution companies. Manages customers, products, inventory, and sales challans through a secure role-based interface.
+A modern, full-stack Enterprise Resource Planning (ERP) and Customer Relationship Management (CRM) Operations Portal built with **TypeScript**, **Node.js (Express)**, **Prisma ORM**, **PostgreSQL**, **React (Vite)**, and **Tailwind CSS**.
 
-## 🚀 Tech Stack
+---
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React + TypeScript + Vite + Tailwind CSS v4 |
-| Backend | Node.js + Express.js + TypeScript |
-| Database | PostgreSQL (Supabase) + Prisma ORM |
-| Auth | JWT + bcrypt |
-| State | React Query + React Context |
+## 🌐 Live Production Links
 
-## 📁 Project Structure
+- **🚀 Live Frontend Web App (Vercel):** [https://warehouse-management-three-omega.vercel.app](https://warehouse-management-three-omega.vercel.app)
+- **⚡ Live Backend REST API (Render):** [https://mini-erp-backend-rvwj.onrender.com/api](https://mini-erp-backend-rvwj.onrender.com/api)
+- **📁 GitHub Repository:** [https://github.com/Nikhilraj1388/WarehouseManagement](https://github.com/Nikhilraj1388/WarehouseManagement)
+
+---
+
+## 🔑 Demo Account Credentials
+
+| Role | Email | Password | Allowed Capabilities |
+| :--- | :--- | :--- | :--- |
+| **👑 ADMIN** | `nikhilraj2342005@gmail.com` | `myPassword123` | Master control: CRM, Inventory, Delivery Challans, Staff User Management, Dashboard Stats. Bypass all role restrictions. |
+| **💼 SALES** | `sales@erp.com` | `sales123` | CRM customer management, create/confirm delivery challans, view stock levels (read-only inventory). |
+| **📦 WAREHOUSE** | `warehouse@erp.com` | `warehouse123` | Product management, stock IN/OUT updates, view stock movement logs, view customer list (read-only). |
+| **💳 ACCOUNTS** | `accounts@erp.com` | `accounts123` | Financial audit, view delivery challan snapshots, view customer background (read-only access). |
+
+---
+
+## 🏗️ System Architecture & Data Flow
 
 ```
-├── backend/
-│   ├── src/
-│   │   ├── controllers/    # Request handlers
-│   │   ├── services/       # Business logic
-│   │   ├── routes/         # API route definitions
-│   │   ├── middleware/     # Auth & error middleware
-│   │   ├── validators/    # Zod validation schemas
-│   │   ├── prisma/        # Prisma client singleton
-│   │   ├── utils/         # Helper functions
-│   │   ├── types/         # TypeScript declarations
-│   │   ├── app.ts         # Express app setup
-│   │   └── server.ts      # Server entry point
-│   └── prisma/
-│       ├── schema.prisma  # Database schema
-│       └── seed.ts        # Seed data
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── pages/         # Page components
-│   │   ├── hooks/         # Custom hooks (useAuth)
-│   │   ├── services/      # API service layer
-│   │   ├── types/         # TypeScript interfaces
-│   │   ├── App.tsx        # Router setup
-│   │   └── main.tsx       # Entry point
-│   └── index.html
-└── docs/                  # Specification documents
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      Frontend (React 18 + Vite + SPA)                    │
+│        TanStack Query • React Router v6 • Axios • Tailwind CSS v4       │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                 HTTPS / JWT
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     Backend API (Node.js + Express + TS)                │
+│       JWT Auth Middleware • Role-Based RBAC • Zod Schema Validation     │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                               Prisma ORM
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     Database (PostgreSQL on Supabase)                    │
+│   Transactional Atomicity ($transaction) • Foreign Key Cascades • Audit  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🔧 Setup Instructions
+### Key Architectural Highlights:
+1. **Atomic Transactional Integrity (`Prisma $transaction`)**:
+   - When a Delivery Challan is transitioned to `CONFIRMED`, the backend executes an atomic transaction that:
+     1. Verifies current product stock level.
+     2. Throws an error and rolls back if stock is insufficient.
+     3. Deducts stock (`currentStock -= qty`).
+     4. Generates an immutable `StockMovement` audit log record (`movementType: OUT`, `reason: Challan #...`).
+     5. Updates challan status to `CONFIRMED`.
+2. **Master Bypass Authorization Middleware**:
+   - The `requireRole(['SALES', ...])` middleware checks user roles. The `ADMIN` role is globally granted master bypass across all routes.
+3. **Immutability & Snapshot Preservation**:
+   - When a Delivery Challan is created, product details (unit price, SKU, product name) are snapshot-stored inside `ChallanItem`. Future price changes to the product will not corrupt historic sales invoices.
+
+---
+
+## 🛡️ Role-Based Access Control (RBAC) Matrix
+
+| Feature / Module | ADMIN | SALES | WAREHOUSE | ACCOUNTS |
+| :--- | :---: | :---: | :---: | :---: |
+| **View Dashboard Stats** | ✅ | ✅ | ✅ | ✅ |
+| **Customer List & Search** | ✅ | ✅ | ✅ (Read) | ✅ (Read) |
+| **Add / Edit / Delete Customer** | ✅ | ✅ | ❌ | ❌ |
+| **Add Customer Follow-up Note** | ✅ | ✅ | ❌ | ❌ |
+| **Product List & Search** | ✅ | ✅ (Read) | ✅ | ✅ (Read) |
+| **Add / Edit / Delete Product** | ✅ | ❌ | ✅ | ❌ |
+| **Update Product Stock (IN/OUT)** | ✅ | ❌ | ✅ | ❌ |
+| **View Stock Movement Log** | ✅ | ✅ | ✅ | ✅ |
+| **Create Delivery Challan (Draft)** | ✅ | ✅ | ❌ | ❌ |
+| **Confirm Challan (Stock Deduction)** | ✅ | ✅ | ❌ | ❌ |
+| **View Challan Snapshots** | ✅ | ✅ | ✅ | ✅ |
+| **Staff & User Management** | ✅ | ❌ | ❌ | ❌ |
+
+---
+
+## 💻 Local Setup & Installation
 
 ### Prerequisites
-- Node.js v18+
-- PostgreSQL database (or Supabase account)
+- **Node.js** v18.0.0 or higher
+- **npm** v9.0.0 or higher
+- **Git**
 
-### Backend Setup
+### 1. Clone Repository
+```bash
+git clone https://github.com/Nikhilraj1388/WarehouseManagement.git
+cd WarehouseManagement
+```
+
+### 2. Backend Setup
 ```bash
 cd backend
 npm install
 ```
 
-Create `.env` file:
+Create a `.env` file inside `backend/`:
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-JWT_SECRET="your-jwt-secret-key"
+DATABASE_URL="postgresql://postgres:Nikhilraj%402304@db.ouqyhqrypxszchhvwyuh.supabase.co:5432/postgres?sslmode=require"
+DIRECT_URL="postgresql://postgres:Nikhilraj%402304@db.ouqyhqrypxszchhvwyuh.supabase.co:5432/postgres?sslmode=require"
+JWT_SECRET="mini-erp-jwt-secret-key-2024"
 PORT=3001
 ```
 
-Run migrations and seed:
+Run database setup & start backend server:
 ```bash
-npx prisma migrate dev --name init
 npx prisma generate
-npm run prisma:seed
-```
-
-Start the server:
-```bash
 npm run dev
 ```
+*Backend will run locally at `http://localhost:3001`.*
 
-### Frontend Setup
+### 3. Frontend Setup
+Open a new terminal tab:
 ```bash
 cd frontend
 npm install
 ```
 
-Create `.env` file:
+Create a `.env` file inside `frontend/`:
 ```env
 VITE_API_URL=http://localhost:3001/api
 ```
 
-Start the dev server:
+Start frontend development server:
 ```bash
 npm run dev
 ```
+*Frontend will run locally at `http://localhost:5173`.*
 
-## 🔑 Test Credentials
+---
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@erp.com | admin123 |
-| Sales | sales@erp.com | sales123 |
-| Warehouse | warehouse@erp.com | warehouse123 |
-| Accounts | accounts@erp.com | accounts123 |
+## ☁️ Cloud Deployment Guide
 
-## 📋 Features
+### Deploying Backend to Render
+1. Create a **Web Service** on Render connected to `Nikhilraj1388/WarehouseManagement`.
+2. Set **Root Directory** to `backend`.
+3. Set **Build Command**: `npm install && npx prisma generate && npm run build`
+4. Set **Start Command**: `npm run start`
+5. Add Environment Variables:
+   - `DATABASE_URL`: `postgresql://postgres.ouqyhqrypxszchhvwyuh:Nikhilraj%402304@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true`
+   - `DIRECT_URL`: `postgresql://postgres:Nikhilraj%402304@db.ouqyhqrypxszchhvwyuh.supabase.co:5432/postgres?sslmode=require`
+   - `JWT_SECRET`: `mini-erp-jwt-secret-key-2024`
+   - `PORT`: `3001`
 
-### Authentication & Authorization
-- JWT-based secure login
-- Role-based access control (Admin, Sales, Warehouse, Accounts)
-- Protected API routes and frontend routes
+### Deploying Frontend to Vercel
+1. Import repository on Vercel.
+2. Set **Root Directory** to `frontend`.
+3. Set **Framework Preset** to `Vite`.
+4. Add Environment Variable:
+   - `VITE_API_URL`: `https://mini-erp-backend-rvwj.onrender.com/api`
 
-### Customer CRM
-- Create, edit, search, and view customers
-- Customer types: Retail, Wholesale, Distributor
-- Status tracking: Lead → Active → Inactive
-- Follow-up notes with timeline
+---
 
-### Product & Inventory Management
-- Full product CRUD with SKU management
-- Real-time stock tracking
-- Stock IN/OUT with movement logging
-- Low stock alerts (below minimum threshold)
-- Complete audit trail via stock movement history
+## 📬 Postman Collection & API Documentation
 
-### Sales Challan
-- Create challans with multiple products
-- Auto-generated challan numbers
-- Draft → Confirmed workflow
-- **Transactional stock deduction** on confirmation
-- Negative stock prevention
-- Product snapshot storage for historical accuracy
+A complete, importable Postman v2.1.0 collection is located at [`postman_collection.json`](./postman_collection.json).
 
-### Dashboard
-- KPI cards: Total Customers, Products, Low Stock, Challans
-- Recent challans overview
-- Upcoming follow-ups
-- Quick action buttons
+### API Endpoints Summary
 
-## 🗄️ Database Schema
+#### 🔒 Authentication (`/api/auth`)
+- `POST /api/auth/login` - Authenticate user & receive JWT token
+- `POST /api/auth/register` - Register a new account
+- `GET /api/auth/me` - Get current authenticated user profile
 
-7 tables with proper relations:
-- **User** — Application users with roles
-- **Customer** — CRM customer data
-- **FollowUp** — Customer follow-up notes
-- **Product** — Product catalog with stock
-- **StockMovement** — Inventory audit trail
-- **Challan** — Sales challan records
-- **ChallanItem** — Challan line items with product snapshots
+#### 👥 Customer CRM Module (`/api/customers`)
+- `GET /api/customers` - List customers (Supports `search`, `status`, `customerType`, `page`, `limit`)
+- `POST /api/customers` - Create customer (Name, Mobile, Email, Business Name, GST Number, Customer Type, Address, Status, Follow-up Date, Notes)
+- `GET /api/customers/:id` - Get customer detail with follow-up timeline & challan history
+- `PUT /api/customers/:id` - Update customer record
+- `POST /api/customers/:id/followups` - Add follow-up note to customer
+- `DELETE /api/customers/:id` - Delete customer record (ADMIN & SALES)
 
-## 🔌 API Endpoints
+#### 📦 Product & Inventory Module (`/api/products`)
+- `GET /api/products` - List products (Supports `search`, `category`, `page`, `limit`)
+- `POST /api/products` - Create product (Name, SKU, Category, Price, Stock, Min Stock Alert, Location)
+- `GET /api/products/:id` - Get product details
+- `PUT /api/products/:id` - Update product details
+- `POST /api/products/:id/stock` - Adjust stock IN/OUT (Creates StockMovement audit record)
+- `GET /api/products/:id/movements` - Get stock movement log history for product
+- `DELETE /api/products/:id` - Delete product record (ADMIN & WAREHOUSE)
 
-```
-POST   /api/auth/login              # Login
-GET    /api/auth/me                 # Current user
+#### 🧾 Delivery Challans Module (`/api/challans`)
+- `GET /api/challans` - List challans (Supports `search`, `status`, `page`, `limit`)
+- `POST /api/challans` - Create Delivery Challan (Draft or Confirmed)
+- `GET /api/challans/:id` - Get challan detail with product snapshot items
+- `PUT /api/challans/:id/status` - Transition status (`CONFIRMED` triggers stock verification & atomic deduction)
 
-GET    /api/customers               # List (search, filter, paginate)
-POST   /api/customers               # Create
-GET    /api/customers/:id           # Detail
-PUT    /api/customers/:id           # Update
-POST   /api/customers/:id/followups # Add follow-up
+#### ⚙️ User Management (`/api/users`)
+- `GET /api/users` - List staff members (ADMIN only)
+- `POST /api/users` - Create staff user with role assignment (ADMIN only)
+- `PUT /api/users/:id` - Update staff role or credentials (ADMIN only)
+- `DELETE /api/users/:id` - Remove staff member (ADMIN only)
 
-GET    /api/products                # List
-POST   /api/products                # Create
-GET    /api/products/:id            # Detail
-PUT    /api/products/:id            # Update
-POST   /api/products/:id/stock      # Update stock
-GET    /api/products/:id/movements  # Stock history
+#### 📊 Dashboard (`/api/dashboard`)
+- `GET /api/dashboard/stats` - Summary KPI metrics, low stock alerts, recent challans, upcoming follow-ups
 
-GET    /api/challans                # List
-POST   /api/challans                # Create
-GET    /api/challans/:id            # Detail
-PUT    /api/challans/:id/status     # Confirm/Cancel
+---
 
-GET    /api/dashboard/stats         # Dashboard KPIs
-```
+## ⚠️ Known Limitations & Future Scope
 
-## 🏗️ Architecture
-
-```
-React Frontend → Axios → Express REST API → Auth Middleware → Controllers → Services → Prisma ORM → PostgreSQL
-```
-
-- JWT authentication secures all protected endpoints
-- Role-based middleware controls module access
-- Challan confirmation uses Prisma `$transaction` for data consistency
-- Stock movements provide complete audit trail
-
-## 📝 Assumptions & Limitations
-
-- Single company instance
-- Single warehouse per product
-- Basic role permissions (4 roles)
-- No purchase order or invoice module
-- No payment gateway integration
-- Simplified inventory model (no reservations)
-
-## 🚀 Deployment
-
-- **Frontend**: Vercel
-- **Backend**: Render
-- **Database**: Supabase PostgreSQL
+1. **Email Notifications**:
+   - *Current Limitation*: Follow-up dates and low stock alerts are displayed visually in the portal UI dashboard.
+   - *Future Scope*: Integration with SendGrid / Nodemailer to send automated email alerts to sales reps for upcoming follow-ups.
+2. **PDF Challan Export**:
+   - *Current Limitation*: Challans are viewed on screen with printable snapshots.
+   - *Future Scope*: Adding `react-pdf` or server-side `puppeteer` PDF generation for one-click downloadable invoice PDFs.
+3. **Multi-Warehouse Transfers**:
+   - *Current Limitation*: Products store a `warehouseLocation` string tag.
+   - *Future Scope*: Multi-tenant warehouse location transfer logs (transfer stock from Warehouse A to Warehouse B).
