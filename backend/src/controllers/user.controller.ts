@@ -30,8 +30,9 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id as string;
     const validatedData = updateUserSchema.parse(req.body);
-    const user = await UserService.updateUser(req.params.id, validatedData);
+    const user = await UserService.updateUser(id, validatedData);
     return successResponse(res, user);
   } catch (error: any) {
     return errorResponse(res, error.errors || error.message, 400);
@@ -40,7 +41,8 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    await UserService.deleteUser(req.params.id, req.user!.userId);
+    const id = req.params.id as string;
+    await UserService.deleteUser(id, req.user!.userId);
     return successResponse(res, { message: 'User deleted successfully' });
   } catch (error: any) {
     return errorResponse(res, error.message, 400);

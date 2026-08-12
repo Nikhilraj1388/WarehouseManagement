@@ -31,7 +31,8 @@ export const createCustomer = async (req: Request, res: Response) => {
 
 export const getCustomerById = async (req: Request, res: Response) => {
   try {
-    const customer = await CustomerService.getCustomerById(req.params.id);
+    const id = req.params.id as string;
+    const customer = await CustomerService.getCustomerById(id);
     return successResponse(res, customer);
   } catch (error: any) {
     return errorResponse(res, error.message, 404);
@@ -40,8 +41,9 @@ export const getCustomerById = async (req: Request, res: Response) => {
 
 export const updateCustomer = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id as string;
     const validatedData = updateCustomerSchema.parse(req.body);
-    const customer = await CustomerService.updateCustomer(req.params.id, validatedData);
+    const customer = await CustomerService.updateCustomer(id, validatedData);
     return successResponse(res, customer);
   } catch (error: any) {
     return errorResponse(res, error.errors || error.message, 400);
@@ -50,7 +52,8 @@ export const updateCustomer = async (req: Request, res: Response) => {
 
 export const deleteCustomer = async (req: Request, res: Response) => {
   try {
-    await CustomerService.deleteCustomer(req.params.id);
+    const id = req.params.id as string;
+    await CustomerService.deleteCustomer(id);
     return successResponse(res, { message: 'Customer deleted successfully' });
   } catch (error: any) {
     return errorResponse(res, error.message, 400);
@@ -59,8 +62,9 @@ export const deleteCustomer = async (req: Request, res: Response) => {
 
 export const addFollowUp = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id as string;
     const validatedData = followUpSchema.parse(req.body);
-    const followUp = await CustomerService.addFollowUp(req.params.id, req.user!.userId, validatedData);
+    const followUp = await CustomerService.addFollowUp(id, req.user!.userId, validatedData);
     return successResponse(res, followUp, 201);
   } catch (error: any) {
     return errorResponse(res, error.errors || error.message, 400);

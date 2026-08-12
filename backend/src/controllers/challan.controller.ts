@@ -30,7 +30,8 @@ export const createChallan = async (req: Request, res: Response) => {
 
 export const getChallanById = async (req: Request, res: Response) => {
   try {
-    const challan = await ChallanService.getChallanById(req.params.id);
+    const id = req.params.id as string;
+    const challan = await ChallanService.getChallanById(id);
     return successResponse(res, challan);
   } catch (error: any) {
     return errorResponse(res, error.message, 404);
@@ -39,13 +40,14 @@ export const getChallanById = async (req: Request, res: Response) => {
 
 export const updateChallanStatus = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id as string;
     const validatedData = updateChallanStatusSchema.parse(req.body);
     let challan;
     
     if (validatedData.status === 'CONFIRMED') {
-      challan = await ChallanService.confirmChallan(req.params.id, req.user!.userId);
+      challan = await ChallanService.confirmChallan(id, req.user!.userId);
     } else {
-      challan = await ChallanService.updateStatus(req.params.id, validatedData.status);
+      challan = await ChallanService.updateStatus(id, validatedData.status);
     }
     
     return successResponse(res, challan);

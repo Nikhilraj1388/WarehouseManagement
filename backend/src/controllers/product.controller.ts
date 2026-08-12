@@ -30,7 +30,8 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const getProductById = async (req: Request, res: Response) => {
   try {
-    const product = await ProductService.getProductById(req.params.id);
+    const id = req.params.id as string;
+    const product = await ProductService.getProductById(id);
     return successResponse(res, product);
   } catch (error: any) {
     return errorResponse(res, error.message, 404);
@@ -39,8 +40,9 @@ export const getProductById = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id as string;
     const validatedData = updateProductSchema.parse(req.body);
-    const product = await ProductService.updateProduct(req.params.id, validatedData);
+    const product = await ProductService.updateProduct(id, validatedData);
     return successResponse(res, product);
   } catch (error: any) {
     return errorResponse(res, error.errors || error.message, 400);
@@ -49,7 +51,8 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    await ProductService.deleteProduct(req.params.id);
+    const id = req.params.id as string;
+    await ProductService.deleteProduct(id);
     return successResponse(res, { message: 'Product deleted successfully' });
   } catch (error: any) {
     return errorResponse(res, error.message, 400);
@@ -58,7 +61,8 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const getProductMovements = async (req: Request, res: Response) => {
   try {
-    const movements = await ProductService.getProductMovements(req.params.id);
+    const id = req.params.id as string;
+    const movements = await ProductService.getProductMovements(id);
     return successResponse(res, movements);
   } catch (error: any) {
     return errorResponse(res, error.message, 500);
@@ -67,8 +71,9 @@ export const getProductMovements = async (req: Request, res: Response) => {
 
 export const updateStock = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id as string;
     const validatedData = stockUpdateSchema.parse(req.body);
-    const product = await ProductService.updateStock(req.params.id, req.user!.userId, validatedData);
+    const product = await ProductService.updateStock(id, req.user!.userId, validatedData);
     return successResponse(res, product);
   } catch (error: any) {
     return errorResponse(res, error.errors || error.message, 400);
